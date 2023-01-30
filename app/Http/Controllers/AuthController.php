@@ -15,7 +15,7 @@ class AuthController extends Controller
         if(!Auth::attempt($request->only('email', 'password')))
         {
             return response()
-                ->json(['message' => 'Datos incorrectos'], 401);
+                ->json(['message' => 'Datos incorrectos', 'status' => false], 401);
         }
 
         $user = User::where('email', $request['email'])->firstOrFail();
@@ -28,6 +28,7 @@ class AuthController extends Controller
                 'accessToken' => $token,
                 'token_type' => 'Bearer',
                 'user' =>$user,
+                'status' => true
             ]);
     }
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Competidores;
 use App\Models\Configuracion;
+use App\Models\Pokemon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
@@ -17,9 +18,18 @@ class CompetidoresController extends Controller
      */
     public function index()
     {
-        //
-        $competidores = Competidores::all();
-        return $competidores;
+        
+        $competidores = Competidores::query()->paginate(perPage:5);
+        $data = array();        
+        foreach ($competidores as $competidor) {
+            $pokemons = Pokemon::where('competidor_id', $competidor->id)->get();
+            $arrTemp = array('entrenador' => $competidor, 'pokemons' => $pokemons);
+            array_push($data, $arrTemp);          
+        }
+
+        $result = array('entrenadores'=>$data, 'paginate' => $competidores);
+
+        return $result;
     }
 
     /**
@@ -40,21 +50,12 @@ class CompetidoresController extends Controller
      */
     public function store(Request $request)
     {
-        // dd($request);
-
-        
+                
         $validator = Validator::make($request->all(), [
             'nombre' => 'required|string|max:255',
             'apellidos' => 'required|string|max:255',
             'correo' => 'required|string|email|max:255|unique:competidores',
-            'fecha_nacimiento' => 'required|date_format:Y-m-d',
-            'id_pokemon1' => 'required|integer',
-            'id_pokemon2' => 'required|integer',
-            'id_pokemon3' => 'required|integer',
-            'id_pokemon4' => 'required|integer',
-            'id_pokemon5' => 'required|integer',
-            'id_pokemon6' => 'required|integer',
-            
+            'fecha_nacimiento' => 'required|date_format:Y-m-d',            
         ]);
 
         if( $validator->fails() ){
@@ -73,30 +74,35 @@ class CompetidoresController extends Controller
                 'status' => false,                
             ],200); 
         }
-    
 
         $competidor = new Competidores;
         
             $competidor->nombre = $request->nombre;
             $competidor->apellidos = $request->apellidos;
             $competidor->correo = $request->correo;
-            $competidor->fecha_nacimiento = $request->fecha_nacimiento;
-            $competidor->id_pokemon1 = $request->id_pokemon1;
-            $competidor->id_pokemon2 = $request->id_pokemon2;
-            $competidor->id_pokemon3 = $request->id_pokemon3;
-            $competidor->id_pokemon4 = $request->id_pokemon4;
-            $competidor->id_pokemon5 = $request->id_pokemon5;
-            $competidor->id_pokemon6 = $request->id_pokemon6;
+            $competidor->fecha_nacimiento = $request->fecha_nacimiento;            
             $competidor->save();
+
+        foreach ($request->pokemones as $pokemon) {
+            $jugador = new Pokemon;
+            $jugador->pokemon_id = $pokemon['id'];
+            $jugador->nombre = $pokemon['name'];
+            $jugador->tipo = $pokemon['type'];
+            $jugador->hp = $pokemon['hp'];
+            $jugador->ataque = $pokemon['attack'];
+            $jugador->defensa = $pokemon['defense'];
+            $jugador->competidor_id = $competidor->id;
+
+            $jugador->save();
+
+        }
 
         return response()->json([
             'competidor' =>$competidor,
             'message' =>'Registro exitoso!!!',
             'status' => true,                
         ],201);
-        // return $competidor;
 
-        
     }
 
     /**
@@ -107,7 +113,7 @@ class CompetidoresController extends Controller
      */
     public function show(Competidores $competidores)
     {
-        //
+        
         return $competidores;
 
     }

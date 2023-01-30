@@ -19,12 +19,12 @@ return new class extends Migration
             $table->string('apellidos');
             $table->string('correo')->unique();
             $table->date('fecha_nacimiento');
-            $table->integer('id_pokemon1');
-            $table->integer('id_pokemon2');
-            $table->integer('id_pokemon3');
-            $table->integer('id_pokemon4');
-            $table->integer('id_pokemon5');
-            $table->integer('id_pokemon6');
+            // $table->integer('id_pokemon1');
+            // $table->integer('id_pokemon2');
+            // $table->integer('id_pokemon3');
+            // $table->integer('id_pokemon4');
+            // $table->integer('id_pokemon5');
+            // $table->integer('id_pokemon6');
             $table->timestamps();
         });
     }
